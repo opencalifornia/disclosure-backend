@@ -4,7 +4,6 @@ Sphinx
 coverage
 hurry.filesize
 pep8
-psycopg2
 pyflakes
 python-coveralls
 python-dateutil
