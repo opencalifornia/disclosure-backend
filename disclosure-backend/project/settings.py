@@ -9,6 +9,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, ".static")
+STATICFILES_DIRS = (
+    "./static",
+)
 
 INSTALLED_APPS = (
     'django.contrib.admin',

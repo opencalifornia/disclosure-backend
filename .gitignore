@@ -3,3 +3,18 @@ env
 example/data/
 example/test-data/csv/
 disclosure-backend/test-data/csv
+disclosure-backend/.static
+settings_local.py
+
+npm-debug.log
+# Compiled Server Files
+static
+reports
+
+# Third Party Dependencies
+bower_components
+node_modules
+/js/libs
+
+# Webstorm Files
+.idea

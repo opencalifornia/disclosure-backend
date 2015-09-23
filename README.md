@@ -1,7 +1,7 @@
 California Civic Lab Disclosure Backend
 ==================================================
 
-## Setup
+## ETL Setup
 
 1. Install python and pip
 2. `sudo pip install virtualenv`
@@ -10,6 +10,7 @@ California Civic Lab Disclosure Backend
    start working)
 5. `pip install -r requirements.txt`
 6. install mysql
+
 
 ## Dependencies
 
@@ -28,6 +29,7 @@ brew install python
 pip install virtualenv
 ```
 
+
 ### MySQL
 
 #### Install mysql
@@ -44,6 +46,42 @@ mysql> create database calaccess_raw;
 mysql> \q
 python disclosure-backend/manage.py migrate
 ```
+
+
+## Web app setup
+
+Follow the [installation
+instructions](https://github.com/creationix/nvm#installation) to install NVM.
+
+Install your first version of node, and set your default.
+
+    $ nvm install v0.10.39
+    $ nvm alias default v0.10.39
+    $ nvm use default
+
+Install bower and gulp.
+
+    $ npm install -g bower gulp
+
+Install the project dependencies.
+
+    $ npm install
+    $ bower install
+
+Build the assets.
+
+    $ gulp build-prod
+    $ python disclosure-backend/manage.py collectstatic
+
+Run the app.
+
+    $ python disclosure-backend/manage.py runserver
+
+Tests can be run with:
+
+    $ gulp test
+
+Learn more [here](js/README.md).
 
 
 ## Download the data

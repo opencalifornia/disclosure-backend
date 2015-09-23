@@ -1,0 +1,20 @@
+@HeaderLightGreyBorderColor: #efefef;
+@HeaderBackgroundColor: #fff;
+
+.header {
+	background-color: @HeaderBackgroundColor;
+}
+
+//Bootstrap Overrides
+.navbar {
+	border-bottom: 5px solid @brand-warning;
+	box-sizing: border-box;
+}
+
+.nav > li {
+	border-left: 1px solid @HeaderLightGreyBorderColor;
+
+	&:nth-last-child(1) {
+		border-right: 1px solid @HeaderLightGreyBorderColor;
+	}
+}
