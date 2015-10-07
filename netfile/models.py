@@ -30,7 +30,7 @@ class NetFileAgency(CalAccessBaseModel):
         verbose_name_plural = 'NETFILE_AGENCY'
 
     def __str__(self):
-        return "%: %s" % (self.agency_id, self.name)
+        return "%s: %s" % (self.agency_id, self.name)
 
 
 class NetFileCal201Transaction(CalAccessBaseModel):

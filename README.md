@@ -82,3 +82,15 @@ trim, clean and process.
 ```
 ssh opencal.opendisclosure.io /usr/local/bin/deploy-backend
 ```
+
+To run for the purposes of development, accessing Django's admin interface:
+
+```
+python disclosure-backend/manage.py createsuperuser
+< and create a username/password for yourself>
+
+python disclosure-backend/manage.py runserver
+```
+
+Then go to http://127.0.0.1:8000/admin to log in and see data.
+
