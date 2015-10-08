@@ -38,5 +38,5 @@ class ZipCodeMetro(CalAccessBaseModel):
         verbose_name_plural = 'ZIPCODE_METRO'
 
     def __str__(self):
-        return "%: %s" % (self.zip, self.metro)
+        return "%05d: %s" % (self.zip_code, self.psa_title)
 
