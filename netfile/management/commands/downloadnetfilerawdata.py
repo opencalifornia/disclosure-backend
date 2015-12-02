@@ -7,6 +7,7 @@ import csv
 import cStringIO
 import codecs
 import glob
+import re
 
 from calaccess_raw import get_download_directory
 from calaccess_raw.management.commands import loadcalaccessrawfile
@@ -105,9 +106,11 @@ class Command(loadcalaccessrawfile.Command):
 
     def combine(self):
         headers_written = False
+        fname_pattern = re.compile('netfile_\d{4}_(.+)_cal201')
+        #                                          ^^ Agency shortcut in filename 
         with file(self.combined_csv_path, 'w') as combined_csv:
             for path in glob.glob(os.path.join(self.data_dir, 'netfile_*_*_cal201_export.csv')):
-                agency_shortcut = path.split('_')[2]
+                agency_shortcut = fname_pattern.search(path).group(1)
                 with file(path, 'r') as agency_csv:
                     headers = ','.join(
                         ['agency_shortcut', agency_csv.readline()])
