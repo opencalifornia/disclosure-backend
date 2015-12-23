@@ -14,8 +14,14 @@ def search_view(request):
         type: string
         paramType: query
     """
-    return Response([{
-        "name": "San Francisco",
-        "type": "county",
-        "fip_id": "6075"
-    }])
+    query = request.query_params.get('q', '').lower()
+    fips_data = [
+        {"name": "San Francisco",
+         "type": "county",
+         "fip_id": "6075"},
+        {"name": "Oakland",
+         "type": "city",
+         "fip_id": "1111"},
+    ]
+    return Response(filter(lambda v: query in v['name'].lower(),
+                    fips_data))
