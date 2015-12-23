@@ -1,12 +1,13 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from .models import FipsEntity
+from .serializers import FipsSerializer
 
 
 @api_view(['GET'])
 def search_view(request):
     """
-    Search for a location (or later, a person or ballot measure).
-    NOTE: This endpoint is currently stubbed.
+    Search for a location.
     ---
     parameters:
       - name: q
@@ -15,13 +16,6 @@ def search_view(request):
         paramType: query
     """
     query = request.query_params.get('q', '').lower()
-    fips_data = [
-        {"name": "San Francisco",
-         "type": "county",
-         "fip_id": "6075"},
-        {"name": "Oakland",
-         "type": "city",
-         "fip_id": "1111"},
-    ]
-    return Response(filter(lambda v: query in v['name'].lower(),
-                    fips_data))
+    query_set = FipsEntity.objects.filter(name__icontains=query)
+    serializer = FipsSerializer(query_set, many=True)
+    return Response(serializer.data)
