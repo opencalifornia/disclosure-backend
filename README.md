@@ -35,7 +35,7 @@ We're going to create an environment with Python 2.7.9 for the project
 0. Clone `disclosure-backend` (or your fork of it) to your own local copy.
 1. Install `python` and `pip` (if using Anaconda, pip is already installed)
 2. Create an environment for this project:
-  * For non-Anaconda Python distribution 
+  * For non-Anaconda Python distribution
     ```
     sudo pip install virtualenv
     virtualenv env
@@ -92,22 +92,25 @@ We're going to create an environment with Python 2.7.9 for the project
   }
   ```
 
-  Change the password field to the password you chose when you installed MySQL. 
+  Change the password field to the password you chose when you installed MySQL.
 
 
 3. Run the database migration scripts
   ```
   python manage.py migrate
   ```
-  
+
   OSX: If you get the following error `django.core.exceptions.ImproperlyConfigured: Error loading MySQLdb module: dlopen(_mysql.so, 2): Library not loaded: libssl.1.0.0.dylib`
-  
+
   Then, you need to add openssl to your `DYLD_LIBRARY_PATH`:
   1. Go to `/usr/local/Cellar/openssl/`, and locate your directory (e.g. 1.0.2d_1)
   2. Add the following to your `~/.bash_profile`:
    ```
    export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/usr/local/Cellar/openssl/1.0.2d_1/lib
    ```
+
+4. Load data from fixtures.
+    ```python manage.py loadalldata```
 
 
 ### Validate your install
@@ -120,7 +123,7 @@ python manage.py test
 
 It should load and clean some files in a few seconds.
 
-Note: if this fails with an SSL error and you are using conda/miniconda, use virtualenv instead. See [this link](https://groups.google.com/a/continuum.io/forum/#!topic/conda/Fqv93VKQXAc) for details about the conda issue. 
+Note: if this fails with an SSL error and you are using conda/miniconda, use virtualenv instead. See [this link](https://groups.google.com/a/continuum.io/forum/#!topic/conda/Fqv93VKQXAc) for details about the conda issue.
 
 #### Run with test data
 
