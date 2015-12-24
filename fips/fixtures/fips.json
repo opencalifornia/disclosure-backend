@@ -1,0 +1,1 @@
+[{"fields": {"type": "ST", "name": "California"}, "model": "fips.fipsentity", "pk": 6}, {"fields": {"type": "CO", "name": "San Diego"}, "model": "fips.fipsentity", "pk": 6073}, {"fields": {"type": "CO", "name": "San Fransisco"}, "model": "fips.fipsentity", "pk": 6075}, {"fields": {"type": "CI", "name": "Oakland"}, "model": "fips.fipsentity", "pk": 53000}]
