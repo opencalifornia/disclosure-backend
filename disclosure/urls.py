@@ -2,6 +2,8 @@ from django.conf.urls import patterns, include, url
 from django.conf import settings
 from django.contrib import admin
 
+from rest_framework.routers import SimpleRouter
+
 from . import views
 
 admin.autodiscover()
@@ -27,15 +29,9 @@ urlpatterns = patterns(
     url(r'^locations/(?P<locality_id>[0-9]+)$', views.location_view,
         name='locality_detail'),
     url(r'^committee/(?P<committee_id>[0-9]+)$', views.committee_view,
-        name='committee_detail'),
+        name='committee_detail'))
 
-    # Funding queries for a specific locality.
-    url(r'^locality/(?P<locality_id>[0-9]+)/contributors/$',
-        views.contributor_view,
-        name='locality_contributors'),
-    url(r'^locality/(?P<locality_id>[0-9]+)/supporting/$',
-        views.supporting_view,
-        name='locality_supporting'),
-    url(r'^locality/(?P<locality_id>[0-9]+)/opposing/$',
-        views.opposing_view,
-        name='locality_opposing'))
+api = SimpleRouter()
+api.register(r'locality/(?P<locality_id>[0-9]+)', views.LocalityViewSet,
+             base_name='locality')
+urlpatterns += api.urls
