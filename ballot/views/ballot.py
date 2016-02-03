@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import api_view, detail_route, list_route
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
@@ -62,13 +62,13 @@ class BallotViewSet(viewsets.ViewSet):
         })
 
     @detail_route(['GET'])
-    def referendum(self, request, locality_id, pk=None):
+    def referendum(self, request, locality_id, referendum_id=None):
         """
-        Your docs
+        TODO: docstring
         ---
         """
         return Response({
-            'measure_id': pk,
+            'measure_id': measure_id,
             'city': {
                 'locality_id': locality_id,
                 'location': {

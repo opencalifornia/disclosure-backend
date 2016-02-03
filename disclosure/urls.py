@@ -27,9 +27,7 @@ urlpatterns = patterns(
 
     # Details for specific objects
     url(r'^locations/(?P<locality_id>[0-9]+)$', views.location_view,
-        name='locality_detail'),
-    url(r'^committee/(?P<committee_id>[0-9]+)$', views.committee_view,
-        name='committee_detail'))
+        name='locality_detail'))
 
 api = SimpleRouter()
 api.register(r'locality/(?P<locality_id>[0-9]+)', views.LocalityViewSet,

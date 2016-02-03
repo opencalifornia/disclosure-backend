@@ -129,35 +129,6 @@ def committee_view(request, committee_id):
 
 
 class LocalityViewSet(viewsets.ViewSet):
-    @list_route(['GET'])
-    def contributor(self, request, locality_id):
-        """
-        Display summarized contributor information
-        ---
-        parameters:
-          - name: locality_id
-            description: The locality_id (can be city, county, state)
-            paramType: path
-            type: integer
-            required: true
-        """
-        return Response([
-            {
-                'name': 'Samantha Brooks',
-                'amount': 700,
-                'date': '2015-04-12'
-            },
-            {
-                'name': 'Lisa Sheppards',
-                'amount': 700,
-                'date': '2015-01-13'
-            },
-            {
-                'name': 'Raoul Esponsito',
-                'amount': 700,
-                'date': '2015-04-04'
-            }
-        ])
 
     @list_route(['GET'])
     def supporting(self, request, locality_id):
