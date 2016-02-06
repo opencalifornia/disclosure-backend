@@ -5,7 +5,8 @@ from django.db.models import Q
 from django.http import HttpResponse, Http404
 from django.template import loader
 
-from rest_framework.decorators import api_view
+from rest_framework import viewsets
+from rest_framework.decorators import api_view, list_route
 from rest_framework.response import Response
 
 from locality.models import City
@@ -87,6 +88,7 @@ def location_view(request, locality_id):
         [(key, val.aggregate(tot=Sum(F('amount')))['tot'] or 0)  # 0 for empty
          for key, val in results_by_locality.items()])
 
+    print 'a'
     return Response({
         "location": {
             "name": locality.name or locality.short_name,
@@ -97,7 +99,7 @@ def location_view(request, locality_id):
         "contribution_count": num_contributions,
         "contribution_by_type": benefits_by_type,
         "contribution_by_area": total_by_locality,
-    }, content_type='application/json')
+    })
 
 
 @api_view(['GET'])
@@ -127,79 +129,49 @@ def committee_view(request, committee_id):
             'inside_state': 0.38,
             'outside_state': 0.06
         }
-    }, content_type='application/json')
+    })
 
 
-@api_view(['GET'])
-def contributor_view(request, locality_id):
-    """
-    Display summarized contributor information
-    ---
-    parameters:
-      - name: locality_id
-        description: The locality_id (can be city, county, state)
-        paramType: path
-        type: integer
-        required: true
-    """
-    return Response([
-        {
-            'name': 'Samantha Brooks',
-            'amount': 700,
-            'date': '2015-04-12'
-        },
-        {
-            'name': 'Lisa Sheppards',
-            'amount': 700,
-            'date': '2015-01-13'
-        },
-        {
-            'name': 'Raoul Esponsito',
-            'amount': 700,
-            'date': '2015-04-04'
-        }
-    ], content_type='application/json')
+class LocalityViewSet(viewsets.ViewSet):
 
+    @list_route(['GET'])
+    def supporting(self, request, locality_id):
+        """
+        Display summarized supporting committee information
+        ---
+        parameters:
+          - name: locality_id
+            description: The locality_id (can be city, county, state)
+            paramType: path
+            type: integer
+            required: true
+        """
+        return Response([
+            {'name': 'Citizens for a Better Oakland', 'contributions': 185859},
+            {'name': 'Oaklanders for Ethical Government', 'contributions': 152330},  # noqa
+            {'name': 'Americans for Liberty', 'contributions': 83199},
+            {'name': 'Golden State Citizens for Positive Reform',
+             'contributions': 23988}
+        ], content_type='application/json')
 
-@api_view(['GET'])
-def supporting_view(request, locality_id):
-    """
-    Display summarized supporting committee information
-    ---
-    parameters:
-      - name: locality_id
-        description: The locality_id (can be city, county, state)
-        paramType: path
-        type: integer
-        required: true
-    """
-    return Response([
-        {'name': 'Citizens for a Better Oakland', 'contributions': 185859},
-        {'name': 'Oaklanders for Ethical Government', 'contributions': 152330},
-        {'name': 'Americans for Liberty', 'contributions': 83199},
-        {'name': 'Golden State Citizens for Positive Reform',
-         'contributions': 23988}
-    ], content_type='application/json')
-
-
-@api_view(['GET'])
-def opposing_view(request, locality_id):
-    """
-    Display summarized opposing committee information
-    ---
-    parameters:
-      - name: locality_id
-        description: The locality_id (can be city, county, state)
-        paramType: path
-        type: integer
-        required: true
-    """
-    return Response([
-        {'name': 'The Public Commission for Ethical Civic Reform',
-         'contributions': 15040},
-        {'name': 'The Committee of True Americans who Dearly Love America '
-                 'and Liberty', 'contributions': 7943}
-    ], content_type='application/json')
+    @list_route(['GET'])
+    def opposing(self, request, locality_id):
+        """
+        Display summarized opposing committee information
+        ---
+        parameters:
+          - name: locality_id
+            description: The locality_id (can be city, county, state)
+            paramType: path
+            type: integer
+            required: true
+        """
+        return Response([
+            {'name': 'The Public Commission for Ethical Civic Reform',
+             'contributions': 15040},
+            {'name': 'The Committee of True Americans who Dearly Love America '
+                     'and Liberty', 'contributions': 7943}
+        ])
 
 
 def homepage_view(request):
