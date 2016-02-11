@@ -70,7 +70,7 @@ def parse_benefactor(row, verbosity=1):
     # Benefactor info
     bf_state, _ = State.objects.get_or_create(
         short_name=clean_state(row.get('tran_ST')) or 'Unknown-State')
-    bf_city, _ = City.objects.get_or_create(
+    bf_city, _ = City.aliased_objects.get_or_create(
         name=clean_city(row.get('tran_City')) or 'Unknown-City',
         state=bf_state)
     bf_zip_code, _ = ZipCode.objects.get_or_create(
@@ -173,7 +173,7 @@ def parse_beneficiary(row, agency, verbosity=1):
     if state.name is None or state.name == '':
         state.name = 'California'
         state.save()
-    locality, _ = City.objects.get_or_create(
+    locality, _ = City.aliased_objects.get_or_create(
         name=agency['name'],
         state=state)
     locality.short_name = agency['shortcut']
