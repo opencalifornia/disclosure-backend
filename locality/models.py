@@ -34,12 +34,15 @@ class LocalityQuerySet(models.QuerySet):
             return super(LocalityQuerySet, self).get(*args, **kwargs)
         except ObjectDoesNotExist as odne:
             # Already did our best; stick with the exception.
-            if 'name' not in kwargs or 'aliases__contains' in kwargs:
+            if 'name' not in kwargs or np.any([key.startswith('aliases') in kwargs]):
                 raise
 
         # Try augmented search
         name = kwargs.pop('name')
-        kwargs['aliases__contains'] = name
+        query = models.Q(aliases__contains=',%s,' % name)
+        query |= models.Q(aliases__startswith='%s,' % name)
+        query |= models.Q(aliases__endswith=',%s' % name)
+        args += (query,)
         try:
             return super(LocalityQuerySet, self).get(*args, **kwargs)
         except MultipleObjectsReturned:
@@ -76,9 +79,10 @@ class Locality(models.Model, ReverseLookupStringMixin):
 
     def clean(self):
         """Make aliases unique & clean."""
-        if self.aliases:
-            aliases_set = set(self.aliases.strip().split(','))
-            aliases_cleaned = ','.join([a.strip() for a in aliases_set])
+        if self.aliases is not None:
+            aliases_set = set([a.strip()
+                               for a in self.aliases.strip().split(',')])
+            aliases_cleaned = ','.join(aliases_set)
             self.aliases = aliases_cleaned or None  # convert blank to None
         return super(Locality, self).clean()
 
