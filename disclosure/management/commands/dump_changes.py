@@ -2,11 +2,24 @@ from django.core import serializers
 from django.core.management.base import BaseCommand
 from django.contrib.admin.models import LogEntry
 
-from locality.models import Locality
+
+def model_and_parents(model):
+    """Get a model and all parents.
+
+    This helps overcome the limits of Django serialization for
+    multi-table inheritance, where only the "local fields" on an
+    object are serialized.
+    """
+    rv = []
+    if model:
+        rv.append(model)
+        for cls in model._meta.get_parent_list():
+            rv.append(cls.objects.get(id=model.id))
+    return rv
 
 
 class Command(BaseCommand):
-    help = 'Generate documentation for models'
+    help = 'Serialize all models edited through the admin interface.'
 
     def add_arguments(self, parser):
         # Positional arguments
@@ -16,15 +29,9 @@ class Command(BaseCommand):
         models = []
         for entry in LogEntry.objects.all():
             edited_object = entry.get_edited_object()
-            if edited_object is None:
-                continue
 
-            # Add the object
-            models.append(edited_object)
-
-            # Add the locality info
-            if issubclass(edited_object.__class__, Locality):
-                models.append(Locality.objects.get(id=edited_object.id))
+            # Add the object and parents
+            models += model_and_parents(edited_object)
 
         # Dump to output.
         with open(options['filename'], 'w') as fp:
