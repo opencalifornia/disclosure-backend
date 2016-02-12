@@ -1,6 +1,10 @@
+import os.path as op
+
 from django.core import serializers
 from django.core.management.base import BaseCommand
 from django.contrib.admin.models import LogEntry
+
+from disclosure import fixtures
 
 
 def model_and_parents(model):
@@ -24,6 +28,9 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         # Positional arguments
         parser.add_argument('filename', default=self.FIXTURE_FILE)
+
+    FIXTURE_FILE = op.join(op.dirname(fixtures.__file__),
+                           'admin-edited-models.json')
 
     def handle(self, *args, **options):
         models = []
