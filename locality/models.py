@@ -1,7 +1,7 @@
 import numpy as np
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from django.db import models
+from django.db import models, transaction
 from django.db.models.fields.related import OneToOneRel
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -180,30 +180,25 @@ class ZipCode(Locality):
 @receiver(post_save, sender=Locality)
 @receiver(post_save, sender=City)
 @receiver(post_save, sender=County)
+@transaction.atomic
 def update_city_aliases(sender, instance, **kwargs):
+    """Merge Locality models on obj1.name in obj2.aliases"""
     if instance.aliases:
         current_aliases = []
-        new_aliases = [a.strip() for a in instance.aliases.split(',')]
-        if len(new_aliases) == 0:
-            remote_models = []
-        else:
-            remote_models = [obj
-                             for a in new_aliases
-                             for obj in sender.objects.filter(name__iexact=a)]
-            if len(remote_models) == 1 and remote_models[0].aliases:
-                # Remote model already has aliases, so flip things:
-                # Call that the instance, and make the instance
-                #   one of the remote models
-                new_aliases = [instance.name]
-                instance, remote_models = remote_models[0], [instance]
-                current_aliases = [a.strip() for a in instance.aliases.split(',')]
+        new_aliases = instance.aliases.split(',')
 
-        # Normalize aliases
-        all_aliases = current_aliases + new_aliases
-        all_aliases_text = ','.join(all_aliases)
-        if instance.aliases != all_aliases_text:
-            instance.aliases = all_aliases_text
-            instance.save()
+        # Resolve which models have a name that is
+        # now an alias.
+        remote_models = [obj
+                         for a in new_aliases
+                         for obj in sender.objects.filter(name__iexact=a)]
+        if len(remote_models) == 1 and remote_models[0].aliases:
+            # Remote model already has aliases, so flip things:
+            # Call that the instance, and make the instance
+            #   one of the remote models
+            new_aliases = [instance.name]
+            instance, remote_models = remote_models[0], [instance]
+            current_aliases = instance.aliases.split(',')
 
         # Migrate any foreign keys off of aliases, then delete.
         for model in remote_models:
@@ -212,7 +207,15 @@ def update_city_aliases(sender, instance, **kwargs):
                 if hasattr(model, attr):
                     for obj in getattr(model, attr).get_queryset():
                         setattr(obj, relationship.field.name, instance)
-            model.delete()
+            model.delete()  # Remove the (now obsolete) aliased model.
+
+        # Normalize aliases
+        all_aliases = current_aliases + new_aliases
+        all_aliases_text = ','.join(all_aliases)
+        if instance.aliases != all_aliases_text:
+            instance.aliases = all_aliases_text
+            instance.save()
+
     return instance
 
 
