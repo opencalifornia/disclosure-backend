@@ -8,13 +8,12 @@ from ...models import City
 class Command(BaseCommand):
     help = 'Dump aliases for cities'
 
-    FIELD_NAMES = ['name', 'short_name', 'state__name',
-                   'state__short_name', 'aliases']
+    FIELD_NAMES = ['name', 'short_name', 'state__short_name', 'aliases']
     CSV_FILE = 'aliases.csv'
 
     def add_arguments(self, parser):
         # Positional arguments
-        parser.add_argument('filename', default=self.CSV_FILE)
+        parser.add_argument('filename', nargs='?', default=self.CSV_FILE)
 
     def handle(self, *args, **options):
         self.dump_aliases(cls=City, filename=options['filename'])
