@@ -1,7 +1,9 @@
 import csv
+import os.path as op
 
 from django.core.management.base import BaseCommand
 
+from ... import data
 from ...models import City
 
 
@@ -9,7 +11,7 @@ class Command(BaseCommand):
     help = 'Dump aliases for cities'
 
     FIELD_NAMES = ['name', 'short_name', 'state__short_name', 'aliases']
-    CSV_FILE = 'aliases.csv'
+    CSV_FILE = op.join(op.dirname(data.__file__), 'aliases.csv')
 
     def add_arguments(self, parser):
         # Positional arguments
