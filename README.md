@@ -123,33 +123,12 @@ python manage.py downloadcalaccessrawdata --use-test-data
 ```
 
 
-### Download data
-
-#### Zipcode/metro data
+### Download and load the data
 
 ```
-python manage.py downloadzipcodedata
-```
-
-#### Netfile
-
-Netfile contains campaign finance data for a number of jurisdictions. Not all
-jurisdictions will have data.
-
-```
-# Download netfile data and load into calaccess_raw.NETFILE_CAL201_TRANSACTION
-python manage.py downloadnetfilerawdata
-# Process NETFILE_CAL201_TRANSACTION into opendisclosure
-python manage.py xformnetfilerawdata
-```
-
-#### Cal-Access
-
-Cal-Access is the state data. It's ~750MB of data and takes over an hour to
-trim, clean and process.
-
-```
-python manage.py downloadcalaccessrawdata
+python manage.py load_aliases  # Load known variations in city names.
+python manage.py downloadnetfilerawdata --agencies CSD,COAK,SFO --years 2014,2015  # download the csv files
+python manage.py xformnetfilerawdata --agencies CSD,COAK,SFO --years 2014,2015  # process the csv files
 ```
 
 
