@@ -43,7 +43,6 @@ INSTALLED_APPS = (
     'calaccess_raw',
     'netfile_raw',
     'zipcode_metro_raw',
-    'text_dedupe',
     'locality',  # dep: none
     'ballot',  # dep: locality
     'finance',  # dep: locality, ballot

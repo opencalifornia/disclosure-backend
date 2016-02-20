@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models.fields.related import OneToOneRel
 from django.utils.encoding import python_2_unicode_compatible
 
-from text_dedupe import dedupe, DedupeMixin
 
 
 class ReverseLookupStringMixin(object):
@@ -23,7 +22,6 @@ class ReverseLookupStringMixin(object):
 
 
 @python_2_unicode_compatible
-@dedupe('name')
 class Locality(DedupeMixin, ReverseLookupStringMixin):
     """
     A base table that gives a globally unique ID to any
@@ -52,7 +50,6 @@ class FipsMixin(Locality):
 
 
 @python_2_unicode_compatible
-@dedupe('name')
 class City(FipsMixin):
     """
     City
