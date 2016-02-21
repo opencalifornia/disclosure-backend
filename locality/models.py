@@ -1,7 +1,7 @@
-from __future__ import unicode_literals
 from django.db import models
 from django.db.models.fields.related import OneToOneRel
 from django.utils.encoding import python_2_unicode_compatible
+
 
 
 class ReverseLookupStringMixin(object):
@@ -22,7 +22,7 @@ class ReverseLookupStringMixin(object):
 
 
 @python_2_unicode_compatible
-class Locality(models.Model, ReverseLookupStringMixin):
+class Locality(DedupeMixin, ReverseLookupStringMixin):
     """
     A base table that gives a globally unique ID to any
     location (city, state, etc)

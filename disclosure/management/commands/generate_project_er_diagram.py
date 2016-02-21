@@ -3,9 +3,8 @@ import os
 
 from django.conf import settings
 from django.core.management import call_command
+from django.core.management.base import BaseCommand
 from django.db import models
-
-from calaccess_raw.management.commands import CalAccessCommand
 
 
 def get_disclosure_app_list():
@@ -41,7 +40,7 @@ def get_mixin_models(app_list=None):
     return mixin_models
 
 
-class Command(CalAccessCommand):
+class Command(BaseCommand):
     help = 'Generate documentation for models'
 
     def handle(self, *args, **kwargs):
