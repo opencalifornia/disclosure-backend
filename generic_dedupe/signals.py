@@ -85,7 +85,7 @@ def apply_dedupe(sender, instance, **kwargs):
                     user, _ = User.objects.get_or_create(username='DedupeUser')
                     from .models import DedupeLogEntry
                     log_entry = DedupeLogEntry(
-                        object_id=obj.pk, object_repr=str(obj), action_flag=ADDITION,
+                        object_id=obj.pk, object_repr=str(obj)[:200], action_flag=ADDITION,
                         content_type_id=ContentType.objects.get_for_model(obj).pk,
                         user_id=user.id,
                         true_model_id=tm.id,
