@@ -52,19 +52,18 @@ def revert_dedupe(sender, instance, **kwargs):
                 #
                 # Otherwise, this is just an actual direct entry
                 #   for the true model.
-                try:
-                    from .models import DedupeLogEntry
-                    log_entry = DedupeLogEntry.objects.get(
-                        object_id=obj.pk,
-                        old_true_model_id=instance.id, true_model_id=tm.id,
-                        class_name=obj.__class__.__name__,
-                        prop_name=relationship.field.name)
-                except DedupeLogEntry.DoesNotExist:
+                from .models import DedupeLogEntry
+                log_entries = DedupeLogEntry.objects.filter(
+                    object_id=obj.pk,
+                    old_true_model_id=instance.id, true_model_id=tm.id,
+                    class_name=obj.__class__.__name__,
+                    prop_name=relationship.field.name)
+                if log_entries.count() == 0:
                     # print("No matching log entry for %s" % obj)
                     continue
                 else:
                     # print("Need to revert for %s" % obj)
-                    log_entry.delete()
+                    log_entries.delete()
 
                 # Reset the attribute to the original value--this model instance.
                 setattr(obj, relationship.field.name, instance)
