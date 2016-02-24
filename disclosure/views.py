@@ -1,6 +1,7 @@
 import os
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -170,6 +171,7 @@ class CandidateViewSet(BallotItemResponseViewSet):
 
 
 def homepage_view(request):
+    """Relevant links and potential issues."""
     template = loader.get_template('homepage.html')
     template_context = {}
     if settings.CRON_LOGS_DIR:
@@ -185,4 +187,18 @@ def homepage_view(request):
 
             with open(cronlog_filepath, 'r') as f:
                 template_context['cronjobs'] += [f.read()]
+    return HttpResponse(template.render(template_context, request))
+
+
+@login_required
+def missing_data_view(request):
+    """Report on which ballot data are missing.
+
+    * Ballot - dates should be set (None by default)
+    * Beneficiary - what is their position (support/oppose), on which BallotItemSelection?
+    *
+    """
+    template = loader.get_template('missing-ballot-data.html')
+    template_context = {
+        'bad_ballots': Ballot.objects.filter(date=None)}
     return HttpResponse(template.render(template_context, request))

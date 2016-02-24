@@ -17,6 +17,7 @@ urlpatterns = patterns(
 
     # Non-API views
     url(r'^$', views.homepage_view),
+    url(r'^missing-data/$', views.missing_data_view),
 
     # inclusions
     url(r'', include('ballot.urls')),

@@ -1,0 +1,8 @@
+{% if bad_ballots %}
+  <h2>Unedited, auto-generated ballots:</h2>
+  <ul>
+  {% for bad_ballot in bad_ballots %}
+    <li><a href="/admin/ballot/ballot/{{ bad_ballot.id }}/">{{ bad_ballot }}</a></li>
+  {% endfor %}
+  </ul>
+{% endif %}
