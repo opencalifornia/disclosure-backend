@@ -310,7 +310,7 @@ def clean_filer_id(filer_id):
 
 
 @transaction.atomic
-def load_f460A_row(row, agency, verbosity=1):  # noqa
+def load_form_row(row, agency, verbosity=1):  # noqa
     """ Loads an individual row from Form 460 Schedule A. # noqa
     This is where most of the magic happens!
 
@@ -386,28 +386,37 @@ def load_f460A_row(row, agency, verbosity=1):  # noqa
             print(str(money))
 
 
-def load_f460A_data(data, agency_fn, verbosity=1):  # noqa
-    """ Loads data from Form 460 Schedule A:
-    contributions to primarily formed committees."""
+def minimize_row(raw_row):
+    """Return a row with all 'None' entries removed."""
+    minimal_row = raw_row.copy()
+
+    # remove useless columns for easier exploring
+    for col in minimal_row.keys():
+        if isnone(minimal_row[col]) or isnan(minimal_row[col]):
+            del minimal_row[col]
+    return minimal_row
+
+
+def load_form_data(data, agency_fn, form_name, form_type=None, verbosity=1):  # noqa
+    """
+    """
+    if form_type is not None:
+        data = data[data['form_Type'] == form_type]
 
     if verbosity > 0:
-        print("Loading %d rows of Form 460 Sched. A data." % len(data))
+        print("Loading %d rows of %s data." % (len(data), form_name))
 
     # Parse out the contributor information.
     error_rows = []
     for ri, (_, raw_row) in enumerate(data.T.iteritems()):
-        assert raw_row['rec_Type'] == 'RCPT'
-        minimal_row = raw_row.copy()
-
-        # remove useless columns for easier exploring
-        for col in minimal_row.keys():
-            if isnone(minimal_row[col]) or isnan(minimal_row[col]):
-                del minimal_row[col]
+        minimal_row = minimize_row(raw_row)
+        if minimal_row.get('rec_Type') not in ['RCPT']:  # , 'S497']:
+            print(minimal_row)
 
         # Store errors, for review later.
         try:
             agency = agency_fn(minimal_row)
-            load_f460A_row(minimal_row, agency=agency, verbosity=verbosity)
+            load_form_row(minimal_row, agency=agency, verbosity=verbosity)
         except Exception as ex:
             error_rows.append((ri, raw_row, minimal_row, ex))
             # TODO: Store errors, for review later.
@@ -418,6 +427,10 @@ def load_f460A_data(data, agency_fn, verbosity=1):  # noqa
 
 class Command(downloadnetfilerawdata.Command):
     help = 'Download and load the netfile raw data into the clean database.'
+
+    FORM_TYPES = [
+        {'form_name': "Form 460 Schedule A", 'form_type': 'A'},
+    ]
 
     def load(self):
         """
@@ -450,21 +463,16 @@ class Command(downloadnetfilerawdata.Command):
         if len({None, np.nan} - set(form_types)) != 2:
             warnings.warn("Some data don't have form_Type set.")
 
-        f460A_data = self.data[self.data['form_Type'] == 'A']
-        error_rows = load_f460A_data(data=f460A_data, verbosity=self.verbosity,
-                                     agency_fn=lambda row: self.get_agency(
-                                         row['filerId'].split('-')[0]))
+        for form_info in self.FORM_TYPES:
+            error_rows = load_form_data(
+                data=self.data, verbosity=self.verbosity,
+                agency_fn=lambda row: self.get_agency(row['filerId'].split('-')[0]),
+                **form_info)
 
-        # Report errors  TODO: push to the database.
-        if len(error_rows) > 0:
-            print("Encountered %d errors; debug!" % len(error_rows))
-            print("Errors:\n%s" % ','.join([e[-1] for e in error_rows]))
-
-        # f497_data = self.data[self.data['form_Type'] == 'F497P2']
-        # load_f497_data(data=f497_data, verbosity=verbosity)
-
-        # f496_data = self.data[self.data['form_Type'] == 'F496P3']
-        # load_f496_data(data=f496_data, verbosity=verbosity)
+            # Report errors  TODO: push to the database.
+            if len(error_rows) > 0:
+                print("Encountered %d errors; debug!" % len(error_rows))
+                print("Errors:\n%s" % ','.join([e[-1] for e in error_rows]))
 
     def get_agency(self, agency_shortcut):
         agency_matches = filter(lambda a: a['shortcut'] == agency_shortcut,
