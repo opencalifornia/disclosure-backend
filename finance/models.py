@@ -222,7 +222,7 @@ class ReportingPeriod(models.Model):
     form = models.ForeignKey('Form')
 
     def __str__(self):
-        return '%s to %s' % (self.period_start or '', self.period_end or '')
+        return '%s: %s to %s' % (self.form, self.period_start or '', self.period_end or '')
 
     class Meta:
         ordering = ('period_start', 'period_end')
@@ -239,7 +239,10 @@ class IndependentMoney(models.Model):
     cumulative_amount = models.FloatField(
         help_text="Total monetary value of provided benefits, to date of this transaction.",
         blank=True, null=True, default=None)
-    reporting_period = models.ForeignKey('ReportingPeriod')
+    reporting_period = models.ForeignKey(
+        'ReportingPeriod',
+        help_text="Form + date range",
+        verbose_name="Form & Reporting Period")
     report_date = models.DateField()
 
     benefactor_zip = models.ForeignKey('locality.ZipCode')

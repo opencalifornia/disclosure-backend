@@ -1,14 +1,19 @@
 """
 Command to download and load California campaign finance data from Netfile.
+
+See https://netfile.com/Filer/Content/docs/cal_format_201.pdf for documentation.
 """
 
 import datetime
 import warnings
 from dateutil.parser import parse as date_parse
 from numbers import Number
+from optparse import make_option
 
 import numpy as np
 import pandas as pd
+
+from django.core.management.base import CommandError
 from django.db import transaction
 
 from ... import models
@@ -147,10 +152,15 @@ def parse_party_from_name(committee_name):
     return Party.objects.get_or_create(name='Unknown')[0]
 
 
-def parse_form_and_report_period(row, verbosity=1):
+def parse_form_and_report_period(row, form, verbosity=1):
     # Create/get the relevant form objects.
+    form_name = form['form_name']
+    form_type = form['form_type']
+    if len(form_type) == 1:
+        form_type = '460' + form_type
+
     f460A, _ = models.Form.objects.get_or_create(  # noqa
-        name='460 Schedule A', text_id='460A',
+        name=form_name, text_id=form_type,
         submission_frequency='SA')
 
     report_date = date_parse(row['tran_Date'])
@@ -277,8 +287,13 @@ def get_committee_benefactor(row):
             raise ValueError('Parsed a null filer_id from %s, but filer_id in the db is %s' % (
                 row.get('cmte_Id'), benefactor.filer_id))
 
-    # of=official, pf=primarily, ic=independent
-    benefactor.type = benefactor.type or 'PF'  # TODO: fix
+    # CC=candidate-controlled, pf=primarily, ic=general purpose, BM=ballot measure
+    if row['form_Type'] in ['F496P3']:  # TODO: take form info OUT of code
+        default_type = 'IC'
+    else:
+        default_type = 'PF'
+    benefactor.type = benefactor.type or default_type  # TODO: fix
+
     return benefactor
 
 
@@ -310,7 +325,7 @@ def clean_filer_id(filer_id):
 
 
 @transaction.atomic
-def load_form_row(row, agency, verbosity=1):  # noqa
+def load_form_row(row, agency, form, verbosity=1):  # noqa
     """ Loads an individual row from Form 460 Schedule A. # noqa
     This is where most of the magic happens!
 
@@ -362,7 +377,7 @@ def load_form_row(row, agency, verbosity=1):  # noqa
         benefactor, bf_zip_code = parse_benefactor(
             row, verbosity=verbosity)
         reporting_period = parse_form_and_report_period(
-            row, verbosity=verbosity)
+            row, form, verbosity=verbosity)
         beneficiary = parse_beneficiary(
             row, agency=agency, verbosity=verbosity)
         beneficiary.ballot_item_selection, beneficiary.support = parse_ballot_info(
@@ -410,13 +425,13 @@ def load_form_data(data, agency_fn, form_name, form_type=None, verbosity=1):  # 
     error_rows = []
     for ri, (_, raw_row) in enumerate(data.T.iteritems()):
         minimal_row = minimize_row(raw_row)
-        if minimal_row.get('rec_Type') not in ['RCPT']:  # , 'S497']:
-            print(minimal_row)
+        assert minimal_row.get('rec_Type') in ('RCPT', 'S497')
 
-        # Store errors, for review later.
         try:
             agency = agency_fn(minimal_row)
-            load_form_row(minimal_row, agency=agency, verbosity=verbosity)
+            load_form_row(
+                minimal_row, agency=agency, verbosity=verbosity,
+                form=dict(form_name=form_name, form_type=form_type))
         except Exception as ex:
             error_rows.append((ri, raw_row, minimal_row, ex))
             # TODO: Store errors, for review later.
@@ -425,12 +440,41 @@ def load_form_data(data, agency_fn, form_name, form_type=None, verbosity=1):  # 
     return error_rows
 
 
+custom_options = (
+    make_option(
+        "--forms",
+        action="store",
+        dest="forms",
+        default=None,
+        help="Form types to upload (comma-separated list; "
+             "choices=('A', 'C', 'F497P1', 'F496P3')"
+    ),
+)
+
+
 class Command(downloadnetfilerawdata.Command):
     help = 'Download and load the netfile raw data into the clean database.'
+    option_list = downloadnetfilerawdata.Command.option_list + custom_options
 
     FORM_TYPES = [
         {'form_name': "Form 460 Schedule A", 'form_type': 'A'},
+        {'form_name': "Form 460 Schedule C", 'form_type': 'C'},
+        {'form_name': "Form 496", 'form_type': 'F496P3'},
+        {'form_name': "Form 497", 'form_type': 'F497P1'}
     ]
+
+    def handle(self, *args, **options):
+        # Resolve human-entered forms.
+        ALL_FORM_TYPES = [f['form_type'] for f in self.FORM_TYPES]
+        user_form_types = options['forms'].split(',') if options['forms'] else ALL_FORM_TYPES
+        self.forms = []
+        for form_type in user_form_types:
+            if form_type not in ALL_FORM_TYPES:
+                raise CommandError("Unknown form type '%s'  ; choose from %s" % (
+                    form_type, ALL_FORM_TYPES))
+            self.forms += [f for f in self.FORM_TYPES if f['form_type'] == form_type]
+
+        super(Command, self).handle(*args, **options)
 
     def load(self):
         """
@@ -463,7 +507,7 @@ class Command(downloadnetfilerawdata.Command):
         if len({None, np.nan} - set(form_types)) != 2:
             warnings.warn("Some data don't have form_Type set.")
 
-        for form_info in self.FORM_TYPES:
+        for form_info in self.forms:
             error_rows = load_form_data(
                 data=self.data, verbosity=self.verbosity,
                 agency_fn=lambda row: self.get_agency(row['filerId'].split('-')[0]),
