@@ -3,6 +3,8 @@ from django.db import models
 from django.db.models.fields.related import OneToOneRel
 from django.utils.encoding import python_2_unicode_compatible
 
+from generic_dedupe import add_dedupe_signals, DedupeMixin
+
 
 class ReverseLookupStringMixin(object):
     def reverse_lookup(self):
@@ -22,7 +24,8 @@ class ReverseLookupStringMixin(object):
 
 
 @python_2_unicode_compatible
-class Locality(models.Model, ReverseLookupStringMixin):
+@add_dedupe_signals
+class Locality(DedupeMixin, ReverseLookupStringMixin):
     """
     A base table that gives a globally unique ID to any
     location (city, state, etc)
@@ -50,6 +53,7 @@ class FipsMixin(Locality):
 
 
 @python_2_unicode_compatible
+@add_dedupe_signals
 class City(FipsMixin):
     """
     City
