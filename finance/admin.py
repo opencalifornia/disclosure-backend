@@ -45,4 +45,4 @@ validate_and_register_admin(
 validate_and_register_admin(
     models.CommitteeBenefactor, CommitteeBenefactorAdmin, num_hidden_fields=9)
 validate_and_register_admin(
-    models.IndependentMoney, IndependentMoneyAdmin, num_hidden_fields=1)
+    models.IndependentMoney, IndependentMoneyAdmin, num_hidden_fields=2)

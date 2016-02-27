@@ -388,6 +388,7 @@ def load_form_row(row, agency, form, verbosity=1):  # noqa
         money = models.IndependentMoney(
             source='NF',
             source_xact_id=row['netFileKey'],
+            filing_id=row.get('filing_id'),
             amount=float(row['tran_Amt1']),
             cumulative_amount=float(row.get('tran_Amt2', 0)) or None,
             report_date=date_parse(row['tran_Date']),

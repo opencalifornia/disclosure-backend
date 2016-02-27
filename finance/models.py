@@ -253,8 +253,11 @@ class IndependentMoney(models.Model):
         max_length=2, choices=SOURCE_TYPES, help_text="e.g. Netfile")
     source_xact_id = models.CharField(
         max_length=32, help_text="Transaction ID (specific to data source)")
-
     unique_together = ("source", "source_xact_id")
+
+    filing_id = models.CharField(
+        max_length=32, help_text="Transaction ID (specific to government processing entity)",
+        blank=True, null=True, default=None)
 
     def __str__(self):
         val = "[%s] gave $%.2f to [%s] @ %s" % (
