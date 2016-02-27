@@ -46,7 +46,7 @@ class Committee(SocialMediaMixin, AddressMixin):
     locality = models.ForeignKey('locality.Locality', blank=True, null=True, default=None)
 
     def __str__(self):
-        return self.name
+        return '[%s] %s' % (self.type, self.name)
 
     class Meta:
         ordering = ('name', 'locality__name', 'locality__short_name')
