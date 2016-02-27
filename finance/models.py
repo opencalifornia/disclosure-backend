@@ -46,7 +46,7 @@ class Committee(SocialMediaMixin, AddressMixin):
     locality = models.ForeignKey('locality.Locality', blank=True, null=True, default=None)
 
     def __str__(self):
-        return self.name
+        return '[%s] %s' % (self.type, self.name)
 
     class Meta:
         ordering = ('name', 'locality__name', 'locality__short_name')
@@ -222,7 +222,7 @@ class ReportingPeriod(models.Model):
     form = models.ForeignKey('Form')
 
     def __str__(self):
-        return '%s to %s' % (self.period_start or '', self.period_end or '')
+        return '%s: %s to %s' % (self.form, self.period_start or '', self.period_end or '')
 
     class Meta:
         ordering = ('period_start', 'period_end')
@@ -236,10 +236,13 @@ class IndependentMoney(models.Model):
         ('NF', 'Netfile'),
     )
     amount = models.FloatField(help_text="Monetary value of the benefit.")
-    cumulative_amount = models.FloatField(help_text="Total monetary value of "
-                                          "provided benefits, to date of this "
-                                          "transaction.")
-    reporting_period = models.ForeignKey('ReportingPeriod')
+    cumulative_amount = models.FloatField(
+        help_text="Total monetary value of provided benefits, to date of this transaction.",
+        blank=True, null=True, default=None)
+    reporting_period = models.ForeignKey(
+        'ReportingPeriod',
+        help_text="Form + date range",
+        verbose_name="Form & Reporting Period")
     report_date = models.DateField()
 
     benefactor_zip = models.ForeignKey('locality.ZipCode')
@@ -250,8 +253,11 @@ class IndependentMoney(models.Model):
         max_length=2, choices=SOURCE_TYPES, help_text="e.g. Netfile")
     source_xact_id = models.CharField(
         max_length=32, help_text="Transaction ID (specific to data source)")
-
     unique_together = ("source", "source_xact_id")
+
+    filing_id = models.CharField(
+        max_length=32, help_text="Transaction ID (specific to government processing entity)",
+        blank=True, null=True, default=None)
 
     def __str__(self):
         val = "[%s] gave $%.2f to [%s] @ %s" % (

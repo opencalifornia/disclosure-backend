@@ -27,7 +27,7 @@ class WithForm460ADataTest(TestCase):
     def setUpClass(cls, test_agency='CMA', test_year='2015'):
         call_command('xformnetfilerawdata',
                      agencies=test_agency, years=test_year,
-                     verbosity=0)
+                     forms='A', verbosity=0)
 
 
 class XformNetfileRawDataUnitTest(TestCase):
@@ -86,7 +86,8 @@ class XformNetfileRawDataTest(TestCase):
 
         # Smoke test--make sure there are no errors.
         call_command('xformnetfilerawdata', verbosity=0,
-                     agencies=test_agency, years=test_year)
+                     agencies=test_agency, years=test_year,
+                     forms='A')
 
         # Check data
         for model in [Ballot, BallotItem, BallotItemSelection,
