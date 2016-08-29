@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 
 from ..models import Ballot
@@ -37,5 +38,9 @@ class CurrentBallotViewSet(BallotViewSet):
         """
         The most recent active ballot.
         """
-        ballot = get_object_or_404(Ballot, locality_id=locality_id)
+        ballot = Ballot.objects.filter(locality__id=locality_id).order_by('-date').first()
+
+        if ballot is None:
+            raise Http404('No ballots for this locality.')
+
         return Response(BallotSerializer(ballot).data)

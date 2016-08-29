@@ -2,27 +2,26 @@ from django.core.urlresolvers import reverse
 
 from rest_framework.test import APITestCase
 
-from finance.tests.utils import with_form460A_data
-from ballot.models import Ballot, Referendum
+from . import factory
 
 
-@with_form460A_data
 class ReferendumAPITest(APITestCase):
+    def setUp(self):
+        self.referendum = factory.ReferendumFactory()
 
     def test_referendum_with_id(self):
-        # referendum = Referendum.objects.all()[0]
-        ballot = Ballot.objects.all()[0]
-        referendum, _ = Referendum.objects.get_or_create(
-            ballot=ballot, title='dummy', number='r123')
+        referendum = self.referendum
 
         resp = self.client.get(
             reverse('referendum_get',
                     kwargs={'referendum_id': referendum.id}))
 
-        self.assertEqual(referendum.id, resp.data['id'])
-        self.assertEqual(referendum.title, resp.data['title'])
-        self.assertEqual(referendum.number, resp.data['number'])
-        self.assertEqual(referendum.ballot.id, resp.data['ballot_id'])
+        self.assertEqual(resp.status_code, 200)
+        self.assertIsNotNone(referendum.title)
+        self.assertEqual(resp.data.get('id'), referendum.id)
+        self.assertEqual(resp.data.get('title'), referendum.title)
+        self.assertEqual(resp.data.get('number'), referendum.number)
+        self.assertEqual(resp.data.get('ballot_id'), referendum.ballot.id)
         self.assertNotIn('ballot', resp.data)
 
     def test_referendum_bad_id_404(self):

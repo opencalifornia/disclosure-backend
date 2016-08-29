@@ -10,7 +10,7 @@ class SupportingOpposingCandidateTests(APITestCase):
     def setUp(self):
         self.office_election = OfficeElectionFactory()
         self.candidate = CandidateFactory(
-            ballot_item=self.office_election
+            office_election=self.office_election
         )
 
     def test_candidate_opposing_list(self):

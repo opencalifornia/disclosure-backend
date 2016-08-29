@@ -1,5 +1,15 @@
 from __future__ import absolute_import
 import factory
+from faker import Faker
+
+faker = Faker()
+
+
+class PartyFactory(factory.django.DjangoModelFactory):
+    name = factory.Faker('company')
+
+    class Meta:
+        model = 'ballot.Party'
 
 
 class StateFactory(factory.django.DjangoModelFactory):
@@ -37,7 +47,7 @@ class ReferendumFactory(factory.django.DjangoModelFactory):
         model = 'ballot.Referendum'
 
     number = factory.Faker('random_letter')
-    title = factory.Faker('sentences', nb=1)
+    title = factory.Faker('text', max_nb_chars=100)
     ballot = factory.SubFactory(BallotFactory)
     contest_type = 'R'
 
@@ -74,4 +84,5 @@ class CandidateFactory(factory.django.DjangoModelFactory):
     first_name = factory.Faker('first_name')
     middle_name = factory.Faker('first_name')
     last_name = factory.Faker('last_name')
-    ballot_item = factory.SubFactory(OfficeElectionFactory)
+    office_election = factory.SubFactory(OfficeElectionFactory)
+    party = factory.SubFactory(PartyFactory)

@@ -1,9 +1,11 @@
+from rest_framework import serializers
+
 from .. import models
-from _django_utils.serializers import ExtendedModelSerializer
 
 
-class ReferendumSerializer(ExtendedModelSerializer):
+class ReferendumSerializer(serializers.ModelSerializer):
+    ballot_id = serializers.PrimaryKeyRelatedField(source='ballot.id', read_only=True)
+
     class Meta:
         model = models.Referendum
-        exclude = ('contest_type',)
-        rename = dict(ballot='ballot_id')
+        exclude = ('ballot',)
