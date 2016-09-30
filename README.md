@@ -84,6 +84,14 @@ to you.  We're going to create an environment with Python 2.7.9 for the project
   * If ```brew install libssl``` does not work don't worry about it.
   * When prompted for a password, remember it because you'll need it.
 
+  Linux/Ubuntu:
+    `sudo apt-get install graphviz`
+
+    MySQL comes installed on the OS by default for versions 12.04 and later. Be sure the service is running: `sudo service mysql start` before troubleshooting.
+
+    _To install MySQL:_
+      `sudo apt-get install mysql-server`
+
 5. Install project requirements with:
    ```
    pip install -r requirements.txt
@@ -103,6 +111,15 @@ to you.  We're going to create an environment with Python 2.7.9 for the project
     ```
     pip install -r requirements_dev.txt
     ```
+
+  Linux/Ubuntu:
+    *Troubleshooting:*
+      * On mysqlclient errors, install:
+      `sudo apt-get install libmysqlclient-dev`
+      * On pygraphviz errors, install:
+      `sudo apt-get install libgraphviz-dev pkg-config`
+      * On Pillow errors, install: 
+      `sudo apt-get install libjpeg-dev`
 
 ### Database setup
 
@@ -168,10 +185,9 @@ jurisdictions will have data.
 ```
 # Download netfile data and load into calaccess_raw.NETFILE_CAL201_TRANSACTION
 python manage.py downloadnetfilerawdata
-# Process NETFILE_CAL201_TRANSACTION into opendisclosure
+# Process NETFILE_CAL201_TRANSACTION into opendisclosure. Takes ~1 hour or more
 python manage.py xformnetfilerawdata
 ```
-
 
 ### Run the server
 
