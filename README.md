@@ -1,3 +1,4 @@
+[![Waffle.io - Columns and their card count](https://badge.waffle.io/caciviclab/disclosure-backend.png?columns=all)](https://waffle.io/caciviclab/disclosure-backend?utm_source=badge)
 [![Build
 Status](https://travis-ci.org/caciviclab/disclosure-backend.svg?branch=master)](https://travis-ci.org/caciviclab/disclosure-backend)
 [![Coverage Status](https://coveralls.io/repos/caciviclab/disclosure-backend/badge.svg?branch=master&service=github)](https://coveralls.io/github/caciviclab/disclosure-backend?branch=master)
